@@ -32,8 +32,7 @@ experiment_template = {
     'SAVE_CORPORA_INTO_FILE': True,
     # Use the Hugging Face path only
     'SPLINTER_TRAINING_CORPUS_PATH': 'amanuelbyte/Amharic_dataset', 
-    'SPLINTER_TRAINING_CORPUS_NAME': 'amharic_full',
-    
+    "SPLINTER_TRAINING_CORPUS_NAME": "default",
     'TRAIN_TOKENIZERS': True,
     'TOKENIZERS_TYPES': ['unigram', 'bpe'],
     
