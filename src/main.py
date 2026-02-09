@@ -20,22 +20,23 @@ def run():
     train_dataset_path = get_run_params("SPLINTER_TRAINING_CORPUS_PATH")
     train_dataset_name = get_run_params("SPLINTER_TRAINING_CORPUS_NAME")
     letters_subset = get_run_params("SPLINTER_LETTERS_SUBSET")
+   
     if get_run_params("SAVE_CORPORA_INTO_FILE"):
         if get_run_params("IS_ENCODED"):
             splinter_trainer = SplinterTrainer(language_utils)
             
-            # 1. Capture all THREE values returned by train()
+            # Capture the 3 values returned by the trainer
             reductions_map, new_unicode_chars_map, inverted_map = splinter_trainer.train(
                 train_dataset_path, train_dataset_name, letters_subset
             )
             
-            # 2. Pass all FOUR required arguments to the constructor
+            # Pass all 4 required arguments to the processor
             text_processor = TextProcessorWithEncoding(
                 language_utils, 
                 reductions_map, 
                 new_unicode_chars_map, 
                 inverted_map
-            )
+            )        
 
         else:
             text_processor = TextProcessorBaseline(language_utils)
@@ -78,7 +79,7 @@ def run():
                     add_static_result_to_file(results)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     slurm_array_task_id = os.getenv('SLURM_ARRAY_TASK_ID')
     task_id = (int(slurm_array_task_id) - 1) if slurm_array_task_id else 0
     experiment = experiments[task_id]
