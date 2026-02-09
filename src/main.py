@@ -1,5 +1,8 @@
-
 import os
+import sys
+
+# Ensure the root directory is in the sys.path for imports to work in Colab
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.CorpusTokenizer import CorpusTokenizer
 from src.SplinterTrainer import SplinterTrainer
@@ -14,34 +17,30 @@ from src.train_tokenizer import train_tokenizer
 from src.utils.path_utils import create_experiment_dirs, get_tokenizer_path, get_corpus_path, get_tokenized_corpus_path
 from src.utils.utils import add_static_result_to_file, get_corpus_name
 
-
 def run():
     language_utils = LanguageUtilsFactory.get_by_language(get_run_params("LANGUAGE"))
     train_dataset_path = get_run_params("SPLINTER_TRAINING_CORPUS_PATH")
     train_dataset_name = get_run_params("SPLINTER_TRAINING_CORPUS_NAME")
     letters_subset = get_run_params("SPLINTER_LETTERS_SUBSET")
-   
+
     if get_run_params("SAVE_CORPORA_INTO_FILE"):
         if get_run_params("IS_ENCODED"):
             splinter_trainer = SplinterTrainer(language_utils)
             
-            # Capture the 3 values returned by the trainer
+            # Capture the 3 values returned by train()
             reductions_map, new_unicode_chars_map, inverted_map = splinter_trainer.train(
                 train_dataset_path, train_dataset_name, letters_subset
             )
-            
-            # Pass all 4 required arguments to the processor
+
+            # Pass all 4 required arguments to the constructor
             text_processor = TextProcessorWithEncoding(
                 language_utils, 
                 reductions_map, 
                 new_unicode_chars_map, 
                 inverted_map
-            )        
-
+            )
         else:
             text_processor = TextProcessorBaseline(language_utils)
-
-   
 
         # save entire corpora as text files, encoded or not
         save_corpus_as_text_file(text_processor, train_dataset_path, train_dataset_name)
@@ -78,8 +77,7 @@ def run():
                     results = run_static_checks(corpus_path, tokenized_corpus_path, tokenizer_path, vocab_size)
                     add_static_result_to_file(results)
 
-
-if __name__ == '__main__':    
+if __name__ == '__main__':
     slurm_array_task_id = os.getenv('SLURM_ARRAY_TASK_ID')
     task_id = (int(slurm_array_task_id) - 1) if slurm_array_task_id else 0
     experiment = experiments[task_id]
