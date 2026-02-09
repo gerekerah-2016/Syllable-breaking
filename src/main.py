@@ -24,9 +24,13 @@ def run():
     if get_run_params("SAVE_CORPORA_INTO_FILE"):
         # this is a splinter experiment
         if get_run_params("IS_ENCODED"):
+            plinter_trainer = SplinterTrainer(language_utils)
+            reductions_map, new_unicode_chars_map, inverted_map = splinter_trainer.train(train_dataset_path, train_dataset_name, letters_subset)
+            text_processor = TextProcessorWithEncoding(language_utils, reductions_map, new_unicode_chars_map, inverted_map)
+        """if get_run_params("IS_ENCODED"):
             splinter_trainer = SplinterTrainer(language_utils)
             reductions_map, new_unicode_chars_map, _ = splinter_trainer.train(train_dataset_path, train_dataset_name, letters_subset)
-            text_processor = TextProcessorWithEncoding(language_utils, reductions_map, new_unicode_chars_map)
+            text_processor = TextProcessorWithEncoding(language_utils, reductions_map, new_unicode_chars_map)"""
 
         # this is a baseline experiment - no splinter
         else:

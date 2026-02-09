@@ -22,7 +22,9 @@ class TextProcessorWithEncoding(TextProcessorInterface):
         
         for sentence in sentences:
             encoded_words_list = list()
-            words = re.split(r'\s|-|,|:|"|\(|\)', sentence)
+            """words = re.split(r'\s|-|,|:|"|\(|\)', sentence)"""
+            words = re.findall(r'\S+', sentence)
+
             for word in words:
                 if not word:
                     continue
