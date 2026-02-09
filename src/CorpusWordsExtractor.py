@@ -10,11 +10,17 @@ class CorpusWordsExtractor:
         self.dataset_name = dataset_name
 
     def convert_corpus_to_words_dict_file(self, corpus, output_filename):
-        # 4. Use the 'text' key from the loaded dataset
-        words = self.get_words_from_corpus(corpus["text"])
-        # ... save logic
+        # Pass the column directly to avoid making a second copy in memory
+        words = self.get_words_from_corpus(corpus) 
+    
+        # Ensure the directory exists before saving
+        os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+    
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            json.dump(words, f, ensure_ascii=False, indent=4)
+        return words    
 
-    def get_words_from_corpus(self, articles_text):
+    def extract_words_with_frequencies(self, articles_text):    
         # Safety Check: If language_utils is None, the experiment cannot continue
         if self.language_utils is None:
             raise ValueError("CorpusWordsExtractor initialized with NoneType language_utils. Check SplinterTrainer init.")
@@ -38,3 +44,4 @@ class CorpusWordsExtractor:
                     words[processed_word] += 1
                     
         return dict(words)
+        

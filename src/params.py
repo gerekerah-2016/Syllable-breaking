@@ -18,52 +18,31 @@ def get_run_params(key):
 def get_all_run_params():
     return run_params
 
-# =====================
-# Language configuration
-# =====================
 
 LANGUAGE = 'gez'          # Geez ISO code
 LANGUAGE_FULL = 'geez'
 EXPERIMENT_DATE = '2025-01-21'
 
+
 # Geez → no Hebrew static checks
 STATIC_CHECKS_CORPORA = []
 
-# =====================
-# Base experiment template
-# =====================
-# =====================
-# Base experiment template
-# =====================
-# In params.py
 experiment_template = {
     'LANGUAGE': 'gez',
     'SAVE_CORPORA_INTO_FILE': True,
+    # Use the Hugging Face path only
+    'SPLINTER_TRAINING_CORPUS_PATH': 'amanuelbyte/Amharic_dataset', 
+    'SPLINTER_TRAINING_CORPUS_NAME': 'amharic_full',
     
-    # ❌ DON'T USE: 'Geez-Dataset'
-    # ✅ USE THE FULL PATH:
-    'SPLINTER_TRAINING_CORPUS_PATH': r'D:\NLP 2026\Splintering\Geez-Dataset', 
- 
-    'SPLINTER_TRAINING_CORPUS_NAME': 'default',
     'TRAIN_TOKENIZERS': True,
     'TOKENIZERS_TYPES': ['unigram', 'bpe'],
     
-    "TOKENIZE_CORPORA": True,
-    "RUN_STATIC_CHECKS": True,
-    "STATIC_CHECKS_CORPORA": ["default"], 
-    "EXPERIMENT_NAME": "2025-01-21-geez-all_letters",
-}
-{
-    # ... existing params ...
-    "TOKENIZE_CORPORA": True,
-    "RUN_STATIC_CHECKS": True,
-    "STATIC_CHECKS_CORPORA": ["default"], 
-    "EXPERIMENT_NAME": "2025-01-21-geez-all_letters",
+    'TOKENIZE_CORPORA': True,
+    'RUN_STATIC_CHECKS': True,
+    'STATIC_CHECKS_CORPORA': ["default"], 
+    'EXPERIMENT_NAME': "2025-01-21-geez-all_letters",
 }
 
-# =====================
-# Experiment variants
-# =====================
 
 def get_all_letters_template():
     t = copy.deepcopy(experiment_template)
@@ -83,14 +62,11 @@ def get_baseline_template():
     t['SPLINTER_LETTERS_SUBSET'] = None
     return t
 
-# =====================
-# Split into multiple runs
-# =====================
 
 def split_to_separate_runs(template):
     runs = []
     # Testing smaller vocab sizes to see if Splintering captures roots better
-    vocab_sizes = [3000, 8000, 4000, 2000, 1000, 800]
+    vocab_sizes = [10000, 8000, 4000, 2000, 1000, 800]
     for vocab_size in vocab_sizes:
         run = copy.deepcopy(template)
         run['TOKENIZERS_VOCAB_SIZES'] = [vocab_size]
@@ -104,9 +80,6 @@ def get_dummy_experiment(experiment_name: str):
     experiment['TOKENIZERS_VOCAB_SIZES'] = [128000]
     return experiment
 
-# =====================
-# Final experiments list
-# =====================
 
 experiments = []
 # 1. Runs the Splintered Ge'ez pipeline

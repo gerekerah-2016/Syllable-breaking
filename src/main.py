@@ -1,11 +1,10 @@
 import os
+# Change this path to a folder on your D: drive where you want the data stored
+os.environ['HF_HOME'] = 'D:/huggingface_cache'
+os.environ['HF_DATASETS_CACHE'] = 'D:/huggingface_cache/datasets'
 import sys
 
-# 1. FORCE Python to look at the D: drive folder first
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # 2. NOW import your project files
 from src.CorpusTokenizer import CorpusTokenizer
 from src.SplinterTrainer import SplinterTrainer
