@@ -72,7 +72,8 @@ class SplinterTrainer:
         
             # We use the 'train' split and the 'text' column based on your log
             # To save memory/time, you can use a subset: dataset['train'].select(range(100000))
-            data_iterator = dataset['train']['text'] 
+           
+            data_iterator = dataset['train'].to_dict()['text']
         else:
             # Fallback for local files if needed
             dataset = load_dataset('text', data_files=dataset_path)
