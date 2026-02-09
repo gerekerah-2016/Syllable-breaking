@@ -137,4 +137,8 @@ class TextProcessorWithEncoding(TextProcessorInterface):
 
     @staticmethod
     def get_single_chars_reductions(reduced_word):
-        return [char for char in reduced_word[::-1]]
+        reductions = []
+        # Ensure we are returning a list of characters
+        for char in reduced_word[::-1]:
+            reductions.append(char)
+        return reductions # Removed the trailing "/content"
