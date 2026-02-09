@@ -15,7 +15,8 @@ class CorpusWordsExtractor:
     
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(words, f, ensure_ascii=False, indent=4)
-        return words  """"  
+        return words  """
+
     def convert_corpus_to_words_dict_file(self, corpus, output_filename):
         words = self.get_words_from_corpus(corpus) 
     
