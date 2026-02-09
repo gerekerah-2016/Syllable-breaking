@@ -8,10 +8,25 @@ class CorpusWordsExtractor:
         self.language_utils = language_utils
         self.dataset_name = dataset_name
 
-    def convert_corpus_to_words_dict_file(self, corpus, output_filename):
+    """def convert_corpus_to_words_dict_file(self, corpus, output_filename):
         words = self.get_words_from_corpus(corpus) 
     
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+    
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            json.dump(words, f, ensure_ascii=False, indent=4)
+        return words  """"  
+    def convert_corpus_to_words_dict_file(self, corpus, output_filename):
+        words = self.get_words_from_corpus(corpus) 
+    
+        # Ensure the output filename is valid
+        if not output_filename or output_filename.strip() == '':
+            raise ValueError(f"Invalid output filename: '{output_filename}'")
+    
+        # Create directory if it doesn't exist
+        output_dir = os.path.dirname(output_filename)
+        if output_dir:  # Only create directory if path has a directory component
+            os.makedirs(output_dir, exist_ok=True)
     
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(words, f, ensure_ascii=False, indent=4)

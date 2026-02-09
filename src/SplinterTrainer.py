@@ -78,7 +78,7 @@ class SplinterTrainer:
         self.save_result_file("new_unicode_chars_inverted", new_chars_to_reductions_map)
         return updated_reductions, reduction_to_new_chars_map, new_chars_to_reductions_map
 
-    def get_word_dict(self, dataset_path, dataset_name):
+    """def get_word_dict(self, dataset_path, dataset_name):
         corpus_name = get_corpus_name(dataset_path, dataset_name)
         if not os.path.exists(f'{get_words_dict_dir()}/{corpus_name}.json'):
             get_logger().info(f'word dict file was not found - creating it from corpus')
@@ -93,6 +93,26 @@ class SplinterTrainer:
             corpus_word_extractor.convert_corpus_to_words_dict_file(corpus, corpus_name)
     
         with open(f'{get_words_dict_dir()}/{corpus_name}.json', 'r', encoding='utf-8') as file:
+            words_dict = json.load(file)
+        return words_dict  """  
+    def get_word_dict(self, dataset_path, dataset_name):
+        corpus_name = get_corpus_name(dataset_path, dataset_name)
+        output_filename = f'{get_words_dict_dir()}/{corpus_name}.json'  # Full path
+    
+        if not os.path.exists(output_filename):
+            get_logger().info(f'word dict file was not found - creating it from corpus')
+        
+            if "amanuelbyte" in dataset_path:
+               corpus = load_dataset(dataset_path, split="train", streaming=True)
+            else:
+                 corpus = load_dataset(dataset_path, dataset_name, split="train", cache_dir=get_raw_data_dir())
+        
+            corpus_word_extractor = CorpusWordsExtractor(self.language_utils)
+        
+            # Pass the full file path, not just the name
+            corpus_word_extractor.convert_corpus_to_words_dict_file(corpus, output_filename)
+
+        with open(output_filename, 'r', encoding='utf-8') as file:
             words_dict = json.load(file)
         return words_dict    
 
