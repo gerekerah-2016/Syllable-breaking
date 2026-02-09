@@ -23,7 +23,9 @@ class TextProcessorWithEncoding(TextProcessorInterface):
         for sentence in sentences:
             encoded_words_list = list()
             """words = re.split(r'\s|-|,|:|"|\(|\)', sentence)"""
-            words = re.findall(r'\S+', sentence)
+            # This splits on whitespace AND common Ge'ez/Latin punctuation
+            words = re.split(r'[\s፡።፣፤፤፥፦፧፨\-,:;()\"\'?!]+', sentence)
+            words = [w for w in words if w] # Filter out empty strings
 
             for word in words:
                 if not word:
