@@ -27,12 +27,12 @@ def run():
         if get_run_params("IS_ENCODED"):
             splinter_trainer = SplinterTrainer(language_utils)
             
-            # FIXED: Capture all THREE values returned by train()
+            # CORRECTED: Capture 3 values (reductions, map, and inverted_map)
             reductions_map, new_unicode_chars_map, inverted_map = splinter_trainer.train(
                 train_dataset_path, train_dataset_name, letters_subset
             )
 
-            # FIXED: Pass all FOUR arguments to the constructor
+            # CORRECTED: Pass 4 arguments (including inverted_map)
             text_processor = TextProcessorWithEncoding(
                 language_utils, 
                 reductions_map, 
@@ -42,42 +42,41 @@ def run():
         else:
             text_processor = TextProcessorBaseline(language_utils)
 
-        # Save corpora as text files
         save_corpus_as_text_file(text_processor, train_dataset_path, train_dataset_name)
         language_utils.save_additional_corpora_for_evaluation(text_processor)
 
-    # Tokenizer Training
     if get_run_params("TRAIN_TOKENIZERS"):
         tokenizer_corpus_path = get_corpus_path(get_corpus_name(train_dataset_path, train_dataset_name))
-        for t_type in get_run_params("TOKENIZERS_TYPES"):
-            for v_size in get_run_params("TOKENIZERS_VOCAB_SIZES"):
-                t_path = get_tokenizer_path(tokenizer_type=t_type, vocab_size=v_size)
-                train_tokenizer(tokenizer_type=t_type, vocab_size=v_size, input_path=tokenizer_corpus_path, output_path=t_path)
+        for tokenizer_type in get_run_params("TOKENIZERS_TYPES"):
+            for vocab_size in get_run_params("TOKENIZERS_VOCAB_SIZES"):
+                tokenizer_path = get_tokenizer_path(tokenizer_type=tokenizer_type, vocab_size=vocab_size)
+                train_tokenizer(tokenizer_type=tokenizer_type, vocab_size=vocab_size, input_path=tokenizer_corpus_path, output_path=tokenizer_path)
 
-    # Tokenization and Static Checks
-    for t_type in get_run_params("TOKENIZERS_TYPES"):
-        for v_size in get_run_params("TOKENIZERS_VOCAB_SIZES"):
+    for tokenizer_type in get_run_params("TOKENIZERS_TYPES"):
+        for vocab_size in get_run_params("TOKENIZERS_VOCAB_SIZES"):
             if get_run_params("TOKENIZE_CORPORA"):
-                t_path = get_tokenizer_path(tokenizer_type=t_type, vocab_size=v_size)
-                for c_name in get_run_params("STATIC_CHECKS_CORPORA"):
-                    c_path = get_corpus_path(c_name)
-                    token_path = get_tokenized_corpus_path(c_name, t_type, v_size)
-                    CorpusTokenizer().tokenize_corpus_into_file(t_path, c_path, token_path)
+                tokenizer_path = get_tokenizer_path(tokenizer_type=tokenizer_type, vocab_size=vocab_size)
+                for corpus_name in get_run_params("STATIC_CHECKS_CORPORA"):
+                    corpus_path = get_corpus_path(corpus_name)
+                    tokenized_corpus_path = get_tokenized_corpus_path(corpus_name, tokenizer_type, vocab_size)
+                    CorpusTokenizer().tokenize_corpus_into_file(tokenizer_path, corpus_path, tokenized_corpus_path)
 
             if get_run_params("RUN_STATIC_CHECKS"):
-                dist = run_types_length_distribution(t_type, v_size)
-                add_static_result_to_file(dist)
-                for c_name in get_run_params("STATIC_CHECKS_CORPORA"):
-                    c_path = get_corpus_path(c_name)
-                    token_path = get_tokenized_corpus_path(c_name, t_type, v_size)
-                    t_path = get_tokenizer_path(tokenizer_type=t_type, vocab_size=v_size)
-                    res = run_static_checks(c_path, token_path, t_path, v_size)
-                    add_static_result_to_file(res)
+                types_length_distribution = run_types_length_distribution(tokenizer_type, vocab_size)
+                add_static_result_to_file(types_length_distribution)
+
+                for corpus_name in get_run_params("STATIC_CHECKS_CORPORA"):
+                    corpus_path = get_corpus_path(corpus_name)
+                    tokenized_corpus_path = get_tokenized_corpus_path(corpus_name, tokenizer_type, vocab_size)
+                    tokenizer_path = get_tokenizer_path(tokenizer_type=tokenizer_type, vocab_size=vocab_size)
+                    results = run_static_checks(corpus_path, tokenized_corpus_path, tokenizer_path, vocab_size)
+                    add_static_result_to_file(results)
 
 if __name__ == '__main__':
-    slurm_id = os.getenv('SLURM_ARRAY_TASK_ID')
-    task_id = (int(slurm_id) - 1) if slurm_id else 0
+    slurm_array_task_id = os.getenv('SLURM_ARRAY_TASK_ID')
+    task_id = (int(slurm_array_task_id) - 1) if slurm_array_task_id else 0
     experiment = experiments[task_id]
+    experiment["TASK_ID"] = task_id
     set_run_params(experiment)
     create_experiment_dirs()
     initialize_logger()
