@@ -24,6 +24,11 @@ class SplinterTrainer:
         get_logger().info(f"Start first iteration of reductions:")
         reductions = self.initialize_reductions_dict(max_length)
         for word_length in range(4, max_length + 1):
+            # PREVIOUS ONE: current_length_words = words_dict_by_length[word_length].keys()
+            # CHANGE: Check if word_length and word_length - 1 exist to prevent KeyError
+            if word_length not in words_dict_by_length or (word_length - 1) not in words_dict_by_length:
+                continue
+
             current_length_words = words_dict_by_length[word_length].keys()
             previous_length_words = words_dict_by_length[word_length - 1].keys()
             for word in current_length_words:
@@ -43,6 +48,11 @@ class SplinterTrainer:
         get_logger().info(f"Start updating reductions:")
         updated_reductions = self.initialize_reductions_dict(max_length)
         for word_length in range(4, max_length + 1):
+            # PREVIOUS ONE: previous_length_words = words_dict_by_length[word_length - 1]
+            # CHANGE: Check if word_length and word_length - 1 exist to prevent KeyError
+            if word_length not in words_dict_by_length or (word_length - 1) not in words_dict_by_length:
+                continue
+
             previous_length_words = words_dict_by_length[word_length - 1]
             current_length_words = words_dict_by_length[word_length]
             for word, score in list(current_length_words.items()):
@@ -72,7 +82,9 @@ class SplinterTrainer:
         corpus_name = get_corpus_name(dataset_path, dataset_name)
         if not os.path.exists(f'{get_words_dict_dir()}/{corpus_name}.json'):
             get_logger().info(f'word dict file was not found - creating it from corpus')
-            corpus = load_dataset(dataset_path, dataset_name, split="train", cache_dir=get_raw_data_dir())
+            
+            # CHANGE: Added streaming=True and split handling to support the large Amharic dataset
+            corpus = load_dataset(dataset_path, dataset_name, split="train", streaming=True)
             corpus_word_extractor = CorpusWordsExtractor(self.language_utils)
             corpus_word_extractor.convert_corpus_to_words_dict_file(corpus, corpus_name)
     
@@ -114,8 +126,8 @@ class SplinterTrainer:
     
     def map_reductions_to_new_chars(self, reductions):
         reductions_set = set()
-        for word_length, reductions in reductions.items():
-            reductions_set.update(reductions.keys())
+        for word_length, length_reductions in reductions.items():
+            reductions_set.update(length_reductions.keys())
         reduction_to_new_chars_map = dict()
         unicode_pua_start = 0x5000
         for i, reduction in enumerate(sorted(reductions_set)):
@@ -128,6 +140,8 @@ class SplinterTrainer:
     
     # change to percents
     def normalize_values(self, dictionary):
+        if not dictionary: # CHANGE: Safety check for empty dictionaries
+            return {}
         values = np.array(list(dictionary.values()))
         percent_dictionary = {key: value for key, value in zip(dictionary.keys(), (values / np.sum(values)))}
         return percent_dictionary
@@ -140,6 +154,10 @@ class SplinterTrainer:
         word_length = len(word)
         possible_reductions = list()
         if word_length > 3:
+            # CHANGE: Check if word_length exists in reductions dictionary
+            if word_length not in reductions:
+                return None
+                
             for reduction, reduction_score in reductions[word_length].items():
                 position, letter = reduction.split(':')
                 position = int(position)
