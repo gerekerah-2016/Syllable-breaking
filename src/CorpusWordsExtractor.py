@@ -13,24 +13,29 @@ class CorpusWordsExtractor:
         self.language_utils = language_utils
 
     def convert_corpus_to_words_dict_file(self, corpus, output_filename):
-        words = self.get_words_from_corpus(corpus["text"])
+        # CHANGE: Instead of passing corpus["text"], we pass the iterable corpus object
+        words = self.get_words_from_corpus(corpus)
         if not os.path.exists(get_words_dict_dir()):
             os.makedirs(get_words_dict_dir())
-        with open(f'{get_words_dict_dir()}/{output_filename}.json', 'w') as file:
-            json.dump(words, file, indent='\t')
+        with open(f'{get_words_dict_dir()}/{output_filename}.json', 'w', encoding='utf-8') as file:
+            json.dump(words, file, indent='\t', ensure_ascii=False)
 
-    def get_words_from_corpus(self, articles_text):
+    def get_words_from_corpus(self, corpus_iterable):
         words = {}
-        for index, article_text in enumerate(articles_text):
+        # CHANGE: Iterate through the dataset rows to support streaming (IterableDataset)
+        for index, row in enumerate(corpus_iterable):
+            article_text = row["text"] # Access the text column from the row
             article_text = self.language_utils.remove_diacritics(article_text)
             article_words = re.split(r'\.|\s|\n|-|,|:|"|\(|\)', article_text)
 
             for word in article_words:
+                if not word: continue
                 if word not in words:
                     words[word] = 0
                 words[word] += 1
 
             if (index + 1) % 10000 == 0:
-                get_logger().info(f'Finished extracting words from {index + 1} articles out of {len(articles_text)}')
-        get_logger().info(f'Finished extracting words from {len(articles_text)} articles out of {len(articles_text)}')
+                get_logger().info(f'Finished extracting words from {index + 1} articles')
+        
+        get_logger().info(f'Finished extracting words from total articles.')
         return words

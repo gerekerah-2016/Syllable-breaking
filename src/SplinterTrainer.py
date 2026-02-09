@@ -77,20 +77,24 @@ class SplinterTrainer:
         new_chars_to_reductions_map = {value: key for key, value in reduction_to_new_chars_map.items()}
         self.save_result_file("new_unicode_chars_inverted", new_chars_to_reductions_map)
         return updated_reductions, reduction_to_new_chars_map, new_chars_to_reductions_map
-    
+
     def get_word_dict(self, dataset_path, dataset_name):
         corpus_name = get_corpus_name(dataset_path, dataset_name)
         if not os.path.exists(f'{get_words_dict_dir()}/{corpus_name}.json'):
             get_logger().info(f'word dict file was not found - creating it from corpus')
             
-            # CHANGE: Added streaming=True and split handling to support the large Amharic dataset
-            corpus = load_dataset(dataset_path, dataset_name, split="train", streaming=True)
+            # CHANGE: Added streaming=True to handle the large Amharic dataset without crashing memory
+            if "amanuelbyte" in dataset_path:
+                corpus = load_dataset(dataset_path, split="train", streaming=True)
+            else:
+                corpus = load_dataset(dataset_path, dataset_name, split="train", cache_dir=get_raw_data_dir())
+            
             corpus_word_extractor = CorpusWordsExtractor(self.language_utils)
             corpus_word_extractor.convert_corpus_to_words_dict_file(corpus, corpus_name)
     
-        with open(f'{get_words_dict_dir()}/{corpus_name}.json', 'r') as file:
+        with open(f'{get_words_dict_dir()}/{corpus_name}.json', 'r', encoding='utf-8') as file:
             words_dict = json.load(file)
-        return words_dict
+        return words_dict    
 
     def pre_process_words(self, word_counters):
         # Remove words that appeared less than 10 times in the entire corpus
