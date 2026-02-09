@@ -1,7 +1,7 @@
 import os
 # Change this path to a folder on your D: drive where you want the data stored
-os.environ['HF_HOME'] = 'D:/huggingface_cache'
-os.environ['HF_DATASETS_CACHE'] = 'D:/huggingface_cache/datasets'
+"""os.environ['HF_HOME'] = 'D:/huggingface_cache'
+os.environ['HF_DATASETS_CACHE'] = 'D:/huggingface_cache/datasets'"""
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
